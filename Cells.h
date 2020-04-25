@@ -7,7 +7,8 @@
 struct Cell
 {
     size_t length;
-    virtual void print(std::ostream &stream) = 0;
+    Cell(const size_t &_length): length(_length) {};
+    virtual void print(std::ostream &stream) const = 0;
 };
 
 template<class  T>
@@ -16,7 +17,7 @@ struct TypedCell : public Cell
 private:
     T value;
 public:
-    TypedCell(T &_value): value(_value) {};
-    virtual void print(std::ostream &stream) { stream << value;}
+    TypedCell(T &_value, const size_t &_length): Cell(_length), value(_value) {};
+    virtual void print(std::ostream &stream) const { stream << value;}
 };
 #endif
