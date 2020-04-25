@@ -13,9 +13,9 @@ int main()
         std::cin >> command;
         if(command.compare("open") == 0)
         {
-            char path[256];
+            std::string path;
             std::cin.ignore();
-            std::cin.getline(path, 256);
+            getline(std::cin, path);
             
             table.read(path);
         }

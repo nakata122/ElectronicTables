@@ -8,13 +8,14 @@
 class Table
 {
 private:
-    std::vector< std::vector<Cell *> > table;
+    std::vector< std::vector<Cell *> > data;
+    std::vector< size_t > maxWidth;
 public:
-    void read(std::string &path);
+    void read(const std::string &path);
     void close();
     void help();
 
-    friend std::ostream &operator <<(std::ostream &stream, Table &table);
+    friend std::ostream &operator <<(std::ostream &stream, Table &obj);
 };
 
 #endif

@@ -6,6 +6,7 @@
 
 struct Cell
 {
+    size_t length;
     virtual void print(std::ostream &stream) = 0;
 };
 
