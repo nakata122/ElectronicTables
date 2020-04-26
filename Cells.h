@@ -17,7 +17,7 @@ struct TypedCell : public Cell
 private:
     T value;
 public:
-    TypedCell(T &_value, const size_t &_length): Cell(_length), value(_value) {};
+    TypedCell(const T &_value, const size_t &_length): Cell(_length), value(_value) {};
     virtual void print(std::ostream &stream) const { stream << value;}
 };
 #endif

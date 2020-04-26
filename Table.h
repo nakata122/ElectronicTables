@@ -12,11 +12,13 @@ private:
     std::vector< size_t > maxWidth;
     size_t maxCols, maxRows;
 
-    size_t expandWidth(const std::string &str, const size_t &row);
+    std::string trim(const std::string &str);
+    Cell *parse(std::string &str);
 public:
     Table(): maxRows(0), maxCols(0) {};
     ~Table();
     void read(const std::string &path);
+    void edit();
     void close();
     void help();
 

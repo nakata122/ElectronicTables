@@ -23,6 +23,10 @@ int main()
         {
             table.close();
         }
+        else if(command.compare("edit") == 0)
+        {
+            table.edit();
+        }
         else if(command.compare("print") == 0)
         {
             std::cout << table << std::endl;

@@ -6,24 +6,40 @@
 
 Table::~Table()
 {
-    for(std::vector <Cell *> col : table)
-    {
-        for(Cell * row: col)
-        {
-            delete row;
-        }
-    }
+    close();
 }
 
-size_t Table::expandWidth(const std::string &str, const size_t &row)
+std::string Table::trim(const std::string &str)
 {
     size_t first = str.find_first_not_of(' ');
     size_t last = str.find_last_not_of(' ');
 
-    size_t width = last - first;
-    if(width > maxWidth[row]) maxWidth[row] = width;
+    size_t width = last - first + 1;
 
-    return width;
+    return str.substr(first, width);
+}
+
+Cell *Table::parse(std::string &str)
+{
+    str = trim(str);
+    double number;
+
+    std::stringstream ss(str);
+    if (ss >> number && ss.eof()) //Number
+    {   
+        return new TypedCell<double>(number, str.length());
+    }
+    else if(str[0] == '=') //Formula
+    {
+
+    }
+    else if(str[0] == '"' && str.back() == '"')
+    {
+        std::string result = str.substr(1, str.length() - 2);
+        return new TypedCell<std::string>(result, result.length());
+    }
+
+    return new TypedCell<char>(' ', 0);
 }
 
 void Table::read(const std::string &path)
@@ -48,13 +64,14 @@ void Table::read(const std::string &path)
         while(getline(ss, param, ','))
         {
             if(maxWidth.size() <= row) maxWidth.push_back(0);
+            param = trim(param);
 
             std::stringstream temp(param);
             if (temp >> number && temp.eof()) //Number
             {
-                size_t width = expandWidth(param, row);
+                if(param.length() > maxWidth[row]) maxWidth[row] = param.length();
                 
-                table[maxCols].push_back(new TypedCell<double>(number, width));
+                table[maxCols].push_back(new TypedCell<double>(number, param.length()));
                 number = 0;
             }
             else if(param[0] == '=') //Formula
@@ -75,9 +92,9 @@ void Table::read(const std::string &path)
                 }
                 getline(ss, empty, ',');
 
-                size_t width = expandWidth(result, row);
+                if(result.length() > maxWidth[row]) maxWidth[row] = result.length();
                 
-                table[maxCols].push_back(new TypedCell<std::string>(result, width));
+                table[maxCols].push_back(new TypedCell<std::string>(result, result.length()));
             }
 
             lastPos = ss.tellg();
@@ -88,6 +105,27 @@ void Table::read(const std::string &path)
     }
 }
 
+void Table::edit()
+{
+    size_t row, col;
+    std::string data;
+    std::cin >> row >> col >> data;
+    if(maxCols <= col || col < 0 || maxRows <= row || row < 0)
+    {
+        std::cout << "Invalid index" << std::endl;
+        return;
+    }
+
+    Cell *ptr = parse(data);
+    if(table[col].size() < row + 1) table[col].resize(row + 1, nullptr);
+
+    if(table[col][row] != nullptr)
+        delete table[col][row];
+
+    if(maxWidth[row] < ptr->length) maxWidth[row] = ptr->length;
+    table[col][row] = ptr;
+}
+
 void Table::help()
 {
     std::cout << "print                     prints file \n"
@@ -96,7 +134,18 @@ void Table::help()
 
 void Table::close()
 {
-
+    for(std::vector <Cell *> &col : table)
+    {
+        for(Cell * row: col)
+        {
+            delete row;
+        }
+        col.clear();
+    }
+    table.clear();
+    maxWidth.clear();
+    maxCols = 0;
+    maxRows = 0;
 }
 
 std::ostream &operator <<(std::ostream &stream, Table &obj)
@@ -108,12 +157,16 @@ std::ostream &operator <<(std::ostream &stream, Table &obj)
         {
             if(obj.table[i].size() > j)
             {
-                //std::cout << j;
-                obj.table[i][j]->print(stream);
-                for(int t=0; t < obj.maxWidth[j] - obj.table[i][j]->length; t++) stream << " ";
+                size_t numSpaces = obj.maxWidth[j];
+                if(obj.table[i][j] != nullptr) 
+                {
+                    numSpaces -= obj.table[i][j]->length;
+                    obj.table[i][j]->print(stream);
+                }
+                for(int t=0; t < numSpaces; t++) stream << " ";
             }
             else 
-                for(int t=0; t < obj.maxWidth[j] + 1; t++) stream << " ";
+                for(int t=0; t < obj.maxWidth[j]; t++) stream << " ";
             stream << "| ";
         }  
         stream << std::endl;
