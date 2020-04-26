@@ -4,6 +4,17 @@
 #include <sstream>
 #include "Table.h"
 
+Table::~Table()
+{
+    for(std::vector <Cell *> col : table)
+    {
+        for(Cell * row: col)
+        {
+            delete row;
+        }
+    }
+}
+
 size_t Table::expandWidth(const std::string &str, const size_t &row)
 {
     size_t first = str.find_first_not_of(' ');

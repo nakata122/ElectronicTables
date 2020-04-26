@@ -15,6 +15,7 @@ private:
     size_t expandWidth(const std::string &str, const size_t &row);
 public:
     Table(): maxRows(0), maxCols(0) {};
+    ~Table();
     void read(const std::string &path);
     void close();
     void help();
