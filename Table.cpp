@@ -2,6 +2,9 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+
+#include "StringHelper.cpp"
+#include "FormulaCell.h"
 #include "Table.h"
 
 Table::~Table()
@@ -9,37 +12,34 @@ Table::~Table()
     close();
 }
 
-std::string Table::trim(const std::string &str)
-{
-    size_t first = str.find_first_not_of(' ');
-    size_t last = str.find_last_not_of(' ');
-
-    size_t width = last - first + 1;
-
-    return str.substr(first, width);
-}
-
 Cell *Table::parse(std::string &str)
 {
-    str = trim(str);
-    double number;
+    int intNum;
+    double doubleNum;
+
+    if(str.size() == 0) return nullptr;
 
     std::stringstream ss(str);
-    if (ss >> number && ss.eof()) //Number
+    if (ss >> intNum && ss.eof()) //Integer
     {   
-        return new TypedCell<double>(number, str.length());
+        return new IntCell(intNum, str.length());
     }
-    else if(str[0] == '=') //Formula
+    ss.seekg(0);
+    if (ss >> doubleNum && ss.eof()) //Double
+    {   
+        return new DoubleCell(doubleNum, str.length());
+    }
+    if(str[0] == '=') //Formula
     {
-
+        return new FormulaCell(str, &table);
     }
-    else if(str[0] == '"' && str.back() == '"')
+    if(str[0] == '"' && str.back() == '"') //String
     {
         std::string result = str.substr(1, str.length() - 2);
-        return new TypedCell<std::string>(result, result.length());
+        return new StringCell(result, result.length());
     }
 
-    return new TypedCell<char>(' ', 0);
+    return nullptr;
 }
 
 void Table::read(const std::string &path)
@@ -64,38 +64,37 @@ void Table::read(const std::string &path)
         while(getline(ss, param, ','))
         {
             if(maxWidth.size() <= row) maxWidth.push_back(0);
-            param = trim(param);
+            param = StringHelper::trim(param);
 
-            std::stringstream temp(param);
-            if (temp >> number && temp.eof()) //Number
+            if(param.length() > 0 && param[0] == '"')
             {
-                if(param.length() > maxWidth[row]) maxWidth[row] = param.length();
-                
-                table[maxCols].push_back(new TypedCell<double>(number, param.length()));
-                number = 0;
-            }
-            else if(param[0] == '=') //Formula
-            {
-
-            }
-            else //String
-            {
-                std::string data, empty, result;
+                std::string empty;
+                param.clear();
                 ss.clear();
                 ss.seekg(lastPos);
-                getline(ss, empty, '"');
-                while(getline(ss, data, '"'))
-                {
-                    result += data;
-                    if(!data.empty() && data.back() == '\\') result += '"';
-                    else break;
-                }
-                getline(ss, empty, ',');
 
-                if(result.length() > maxWidth[row]) maxWidth[row] = result.length();
-                
-                table[maxCols].push_back(new TypedCell<std::string>(result, result.length()));
+                char ch;
+                getline(ss, empty, '"');
+                param += '"';
+                while(ss.get(ch) && ch != '"')
+                {
+                    param += ch;
+                    if(ch == '\\') 
+                    {
+                        ss.get(ch);
+                        param += ch;
+                    }
+
+                }
+                param += '"';
+                getline(ss, empty, ',');
             }
+
+            Cell *ptr = parse(param);
+            
+            if(ptr != nullptr && ptr->length > maxWidth[row]) maxWidth[row] = ptr->length;
+            table[maxCols].push_back(ptr);
+            
 
             lastPos = ss.tellg();
             row++;

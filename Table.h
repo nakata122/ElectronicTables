@@ -12,7 +12,6 @@ private:
     std::vector< size_t > maxWidth;
     size_t maxCols, maxRows;
 
-    std::string trim(const std::string &str);
     Cell *parse(std::string &str);
 public:
     Table(): maxRows(0), maxCols(0) {};
