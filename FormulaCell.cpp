@@ -4,6 +4,11 @@
 
 #include "FormulaCell.h"
 
+void FormulaCell::serialize(std::ostream &stream) 
+{ 
+    stream << expression;
+}
+
 void FormulaCell::print(std::ostream &stream) 
 { 
     length = 3;
@@ -11,8 +16,19 @@ void FormulaCell::print(std::ostream &stream)
     ss.get(); // ignore = sign
 
     double result = calculate(ss);
-    if(valid) stream << result;
-    else stream << "ERROR";
+    if(valid) {
+        std::ostringstream checkSize;
+        checkSize << result;
+        length = checkSize.tellp();
+        checkSize.clear();
+
+        stream << result;
+    }
+    else 
+    {
+        length = 5;
+        stream << "ERROR";
+    }
 }
 
 double FormulaCell::getNum(std::stringstream &ss)
@@ -72,6 +88,11 @@ double FormulaCell::secondPriority(std::stringstream &ss)
 
         if (ch == '*')
             result *= number;
+        else if(number == 0 && ch == '/')
+        {
+            valid = false;
+            return 0;
+        }
         else
             result /= number;
     }

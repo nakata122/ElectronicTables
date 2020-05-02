@@ -33,11 +33,15 @@ int main()
         }
         else if(command.compare("save") == 0)
         {
-            
+            table.save();
         }
         else if(command.compare("saveas") == 0)
-        {
+        {   
+            std::string path;
+            std::cin.ignore();
+            getline(std::cin, path);
 
+            table.saveAs(path);
         }
         else if(command.compare("help") == 0)
         {

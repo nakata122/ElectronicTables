@@ -16,6 +16,7 @@ Cell *Table::parse(std::string &str)
 {
     int intNum;
     double doubleNum;
+    str = StringHelper::trim(str);
 
     if(str.size() == 0) return nullptr;
 
@@ -44,6 +45,8 @@ Cell *Table::parse(std::string &str)
 
 void Table::read(const std::string &path)
 {
+    if(!fileName.empty()) close();
+
     std::ifstream file(path);
     if(!file.is_open())
     {
@@ -102,13 +105,19 @@ void Table::read(const std::string &path)
         if(row > maxRows) maxRows = row;
         maxCols++;
     }
+
+    fileName = path;
+    std::cout << "Succesfully opened file " << fileName << std::endl;
 }
 
 void Table::edit()
 {
     size_t row, col;
     std::string data;
-    std::cin >> row >> col >> data;
+    std::cin >> row >> col;
+    getline(std::cin, data);
+    std::cout << data << std::endl;
+
     if(maxCols <= col || col < 0 || maxRows <= row || row < 0)
     {
         std::cout << "Invalid index" << std::endl;
@@ -145,6 +154,42 @@ void Table::close()
     maxWidth.clear();
     maxCols = 0;
     maxRows = 0;
+    
+    std::cout << "Succesfully closed file " << fileName << std::endl;
+    fileName.clear();
+}
+
+void Table::serialize(const std::string &path)
+{
+    std::ofstream file(path);
+
+    for(std::vector< Cell *> &col : table)
+    {
+        for(Cell *row : col)
+        {
+            if(row != nullptr) row->serialize(file);
+            file << ',';
+        }  
+        file << std::endl;
+    }
+}
+
+void Table::save()
+{
+    if(fileName.empty()) 
+    {
+        std::cout << "File not opened" << std::endl;
+        return;
+    }
+    serialize(fileName);
+
+    std::cout << "Successfully saved file " << fileName << std::endl;
+}
+
+void Table::saveAs(const std::string &path)
+{
+    serialize(path);
+    std::cout << "Successfully saved file " << path << std::endl;
 }
 
 std::ostream &operator <<(std::ostream &stream, Table &obj)
@@ -159,8 +204,8 @@ std::ostream &operator <<(std::ostream &stream, Table &obj)
                 size_t numSpaces = obj.maxWidth[j];
                 if(obj.table[i][j] != nullptr) 
                 {
-                    numSpaces -= obj.table[i][j]->length;
                     obj.table[i][j]->print(stream);
+                    numSpaces -= obj.table[i][j]->length;
                 }
                 for(int t=0; t < numSpaces; t++) stream << " ";
             }

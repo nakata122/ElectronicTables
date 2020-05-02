@@ -20,6 +20,7 @@ private:
 public:
     FormulaCell(const std::string &str, std::vector < std::vector <Cell *> > *_table): Cell(0), expression(str), table(_table) {};
     virtual void print(std::ostream &stream);
+    virtual void serialize(std::ostream &stream);
     virtual double getValue();
 };
 

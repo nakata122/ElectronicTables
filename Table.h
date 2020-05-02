@@ -8,11 +8,13 @@
 class Table
 {
 private:
+    std::string fileName;
     std::vector< std::vector<Cell *> > table;
     std::vector< size_t > maxWidth;
     size_t maxCols, maxRows;
 
     Cell *parse(std::string &str);
+    void serialize(const std::string &path);
 public:
     Table(): maxRows(0), maxCols(0) {};
     ~Table();
@@ -20,6 +22,8 @@ public:
     void edit();
     void close();
     void help();
+    void save();
+    void saveAs(const std::string &path);
 
     friend std::ostream &operator <<(std::ostream &stream, Table &obj);
 };

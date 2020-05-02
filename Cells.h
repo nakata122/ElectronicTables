@@ -12,6 +12,7 @@ struct Cell
     size_t length;
     Cell(const size_t &_length): length(_length) {};
     virtual void print(std::ostream &stream) = 0;
+    virtual void serialize(std::ostream &stream) = 0;
     virtual double getValue() = 0;
 };
 
@@ -24,6 +25,7 @@ private:
 public:
     IntCell(const int &_value, const size_t &_length): Cell(_length), value(_value) {};
     virtual void print(std::ostream &stream) { stream << value;}
+    virtual void serialize(std::ostream &stream) { stream << value;}
     virtual double getValue()
     {
         return (double)value;
@@ -37,6 +39,7 @@ private:
 public:
     DoubleCell(const double &_value, const size_t &_length): Cell(_length), value(_value) {};
     virtual void print(std::ostream &stream) { stream << value;}
+    virtual void serialize(std::ostream &stream) { stream << value;}
     virtual double getValue()
     {
         return value;
@@ -50,6 +53,7 @@ private:
 public:
     StringCell(const std::string &_value, const size_t &_length): Cell(_length), value(_value) {};
     virtual void print(std::ostream &stream) { stream << value;}
+    virtual void serialize(std::ostream &stream) { stream << '"' << value << '"';}
     virtual double getValue()
     {
         double result = 0;
