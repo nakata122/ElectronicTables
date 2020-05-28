@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "StringHelper.cpp"
+#include "StringHelper.h"
 #include "FormulaCell.h"
 #include "Table.h"
 
@@ -32,7 +32,7 @@ Cell *Table::parse(std::string &str)
     }
     if(str[0] == '=') //Formula
     {
-        return new FormulaCell(str, &table);
+        return new FormulaCell(str, table);
     }
     if(str[0] == '"' && str.back() == '"') //String
     {
@@ -95,6 +95,9 @@ void Table::read(const std::string &path)
 
             Cell *ptr = parse(param);
             
+            if(ptr == nullptr && !param.empty()) 
+                std::cerr << "Error: row " << row << ", col " << maxCols << ", "<< param << " is unknown data type" << std::endl;
+
             if(ptr != nullptr && ptr->length > maxWidth[row]) maxWidth[row] = ptr->length;
             table[maxCols].push_back(ptr);
             
@@ -104,23 +107,19 @@ void Table::read(const std::string &path)
         }
         if(row > maxRows) maxRows = row;
         maxCols++;
+        std::cout << std::endl;
     }
 
     fileName = path;
     std::cout << "Succesfully opened file " << fileName << std::endl;
 }
 
-void Table::edit()
+void Table::edit(size_t row, size_t col, std::string data)
 {
-    size_t row, col;
-    std::string data;
-    std::cin >> row >> col;
-    getline(std::cin, data);
-    std::cout << data << std::endl;
 
     if(maxCols <= col || col < 0 || maxRows <= row || row < 0)
     {
-        std::cout << "Invalid index" << std::endl;
+        std::cerr << "Invalid index" << std::endl;
         return;
     }
 
@@ -130,8 +129,17 @@ void Table::edit()
     if(table[col][row] != nullptr)
         delete table[col][row];
 
-    if(maxWidth[row] < ptr->length) maxWidth[row] = ptr->length;
-    table[col][row] = ptr;
+    
+    if(ptr != nullptr)
+    {
+        table[col][row] = ptr;
+        ptr->print(std::cout);
+        std::cout << " successfully edited\n";
+        StringHelper::printComments();
+        
+        if(maxWidth[row] < ptr->length) maxWidth[row] = ptr->length;
+    }
+    else std::cerr << "Unknown data type.\n";
 }
 
 void Table::help()
@@ -205,7 +213,9 @@ std::ostream &operator <<(std::ostream &stream, Table &obj)
                 if(obj.table[i][j] != nullptr) 
                 {
                     obj.table[i][j]->print(stream);
-                    numSpaces -= obj.table[i][j]->length;
+                    if(obj.table[i][j]->length > obj.maxWidth[j]) obj.maxWidth[j] = obj.table[i][j]->length;
+
+                    numSpaces = obj.maxWidth[j] - obj.table[i][j]->length;
                 }
                 for(int t=0; t < numSpaces; t++) stream << " ";
             }
@@ -215,5 +225,8 @@ std::ostream &operator <<(std::ostream &stream, Table &obj)
         }  
         stream << std::endl;
     }
+
+    StringHelper::printComments();
+
     return stream;
 }

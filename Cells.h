@@ -5,19 +5,21 @@
 #include <sstream>
 #include <iostream>
 
-#include "StringHelper.cpp"
+#include "StringHelper.h"
 
-struct Cell
+/// Abstract class Cell used for holding different value types
+class Cell
 {
-    size_t length;
-    Cell(const size_t &_length): length(_length) {};
-    virtual void print(std::ostream &stream) = 0;
-    virtual void serialize(std::ostream &stream) = 0;
-    virtual double getValue() = 0;
+public:
+    size_t length; ///<Amount of characters needed to print. Used for alignment when printing
+    ///Initialize an empty cell
+    Cell(const size_t &_length): length(_length) {}; 
+    virtual void print(std::ostream &stream) = 0; ///<Print on console
+    virtual void serialize(std::ostream &stream) = 0; ///<Save in file
+    virtual double getValue() = 0; ///<Returns a double number for calculating a formula
 };
 
-//Tried with templates first but couldn't make the getValue to work properly for all subclasses
-
+///Cell holding integer values
 class IntCell : public Cell
 {
 private:
@@ -32,6 +34,7 @@ public:
     }
 };
 
+///Cell holding double values
 class DoubleCell : public Cell
 {
 private:
@@ -46,6 +49,7 @@ public:
     }
 };
 
+///Cell holding string values
 class StringCell : public Cell
 {
 private:
@@ -54,16 +58,18 @@ public:
     StringCell(const std::string &_value, const size_t &_length): Cell(_length), value(_value) {};
     virtual void print(std::ostream &stream) { stream << value;}
     virtual void serialize(std::ostream &stream) { stream << '"' << value << '"';}
-    virtual double getValue()
+    virtual double getValue() ///<Converts string into a double value if possible
     {
         double result = 0;
         std::string str = StringHelper::trim(value);
         std::stringstream ss(str);
 
         if (ss >> result && ss.eof()) //Double
-        {   
+        {
+            StringHelper::addComment("The string \"" + value + "\" is converted to " + value + "\n");
             return result;
         }
+        StringHelper::addComment("The string " + value + " is converted to 0\n");
         return 0;
     }
 };

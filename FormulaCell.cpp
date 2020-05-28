@@ -1,5 +1,6 @@
 #include <sstream>
 #include <cmath>
+#include <string> 
 #include <iostream>
 
 #include "FormulaCell.h"
@@ -54,7 +55,14 @@ double FormulaCell::getNum(std::stringstream &ss)
         if(ch == 'C') ss >> col;
         else return 0;
 
-        number = (*table)[row][col]->getValue();
+        if(row >= table.size() || col >= table[row].size()) 
+        {
+            StringHelper::addComment("Element at row " + std::to_string(row) + " col " + std::to_string(col) + " does not exits\n");
+        }
+        else 
+        {
+            number = table[row][col]->getValue();
+        }
     }
 
     while (ss.peek() == ' ') ss.get(); // Skip spaces
@@ -102,6 +110,7 @@ double FormulaCell::secondPriority(std::stringstream &ss)
 double FormulaCell::calculate(std::stringstream &ss)
 {
     char ch;
+    valid = true;
 
     double result = secondPriority(ss);
     while (ss.peek() == '+' || ss.peek() == '-')
@@ -114,9 +123,6 @@ double FormulaCell::calculate(std::stringstream &ss)
             result -= secondPriority(ss);
     }
     return result;
-
-    
-    return 0;
 }
 
 double FormulaCell::getValue()

@@ -24,8 +24,12 @@ int main()
             table.close();
         }
         else if(command.compare("edit") == 0)
-        {
-            table.edit();
+        {    
+            size_t row, col;
+            std::string data;
+            std::cin >> row >> col;
+            getline(std::cin, data);
+            table.edit(row, col, data);
         }
         else if(command.compare("print") == 0)
         {
