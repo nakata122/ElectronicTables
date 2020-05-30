@@ -15,7 +15,7 @@ private:
     std::vector< size_t > maxWidth; ///<Maximum width for each row
     size_t maxCols, maxRows;
 
-    Cell *parse(std::string &str); ///<Returns a new created Cell.
+    Cell *parse(std::string &str); ///<Returns a new created Cell. 
     void serialize(const std::string &path); ///<Save table in file
 public:
     ///Initialize an empty table

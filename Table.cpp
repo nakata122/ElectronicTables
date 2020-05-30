@@ -107,7 +107,6 @@ void Table::read(const std::string &path)
         }
         if(row > maxRows) maxRows = row;
         maxCols++;
-        std::cout << std::endl;
     }
 
     fileName = path;
@@ -144,8 +143,8 @@ void Table::edit(size_t row, size_t col, std::string data)
 
 void Table::help()
 {
-    std::cout << "print                     prints file \n"
-              << "edit <row> <col> <data>	changes data  \n";
+    std::cout << "print         prints file \n"
+              << "edit <row> <col> <data>   changes data  \n";
 }
 
 void Table::close()

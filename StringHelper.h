@@ -4,14 +4,15 @@
 #include<string>
 #include<queue>
 
-struct StringHelper
+///Represents a class to extend the functionality of stl string
+class StringHelper
 {
 private:
-    static std::queue<std::string> comments;
+    static std::queue<std::string> comments; ///<Represents queue, holding comments
 public:
-    static void addComment(const std::string &comment);
-    static void printComments();
-    static std::string trim(const std::string &str);
+    static void addComment(const std::string &comment);///<Add a comment to the queue
+    static void printComments();///<Clears queue of comments
+    static std::string trim(const std::string &str);///<Removes leading and ending spaces from a string
 };
 
 #endif

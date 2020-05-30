@@ -58,11 +58,15 @@ double FormulaCell::getNum(std::stringstream &ss)
         if(row >= table.size() || col >= table[row].size()) 
         {
             StringHelper::addComment("Element at row " + std::to_string(row) + " col " + std::to_string(col) + " does not exits\n");
+            number = 0;
+        }
+        else if(table[row][col] == nullptr)
+        {
+            StringHelper::addComment("Element at row " + std::to_string(row) + " col " + std::to_string(col) + " is empty\n");
+            number = 0;
         }
         else 
-        {
             number = table[row][col]->getValue();
-        }
     }
 
     while (ss.peek() == ' ') ss.get(); // Skip spaces
