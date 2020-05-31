@@ -15,11 +15,13 @@ private:
     std::vector< size_t > maxWidth; ///<Maximum width for each row
     size_t maxCols, maxRows;
 
-    Cell *parse(std::string &str); ///<Returns a new created Cell. 
+    void copy(Table &other);
     void serialize(const std::string &path); ///<Save table in file
 public:
     ///Initialize an empty table
     Table(): maxRows(0), maxCols(0) {};
+    Table(Table &other); ///<Copy table
+    Table &operator =(Table &other); ///<Copy table
     ~Table(); ///<Clear table contents
     void read(const std::string &path); ///<Open file and load into memory
     void edit(size_t row, size_t col, std::string data); ///<Edits value of a cell with the data which could be any type

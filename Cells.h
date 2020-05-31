@@ -17,6 +17,7 @@ public:
     virtual void print(std::ostream &stream) = 0; ///<Print on console
     virtual void serialize(std::ostream &stream) = 0; ///<Save in file
     virtual double getValue() = 0; ///<Returns a double number for calculating a formula
+    virtual Cell *clone(std::vector < std::vector <Cell *> > &_table) = 0; ///<Clones object
 };
 
 ///Cell holding integer values
@@ -26,6 +27,7 @@ private:
     int value;
 public:
     IntCell(const int &_value, const size_t &_length): Cell(_length), value(_value) {};
+    virtual Cell *clone(std::vector < std::vector <Cell *> > &_table) { return new IntCell(*this); }
     virtual void print(std::ostream &stream) { stream << value;}
     virtual void serialize(std::ostream &stream) { stream << value;}
     virtual double getValue()
@@ -41,6 +43,7 @@ private:
     double value;
 public:
     DoubleCell(const double &_value, const size_t &_length): Cell(_length), value(_value) {};
+    virtual Cell *clone(std::vector < std::vector <Cell *> > &_table) { return new DoubleCell(*this); }
     virtual void print(std::ostream &stream) { stream << value;}
     virtual void serialize(std::ostream &stream) { stream << value;}
     virtual double getValue()
@@ -56,6 +59,7 @@ private:
     std::string value;
 public:
     StringCell(const std::string &_value, const size_t &_length): Cell(_length), value(_value) {};
+    virtual Cell *clone(std::vector < std::vector <Cell *> > &_table) { return new StringCell(*this); }
     virtual void print(std::ostream &stream) { stream << value;}
     virtual void serialize(std::ostream &stream) { stream << '"' << value << '"';}
     virtual double getValue() ///<Converts string into a double value if possible

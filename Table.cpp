@@ -4,7 +4,7 @@
 #include <sstream>
 
 #include "StringHelper.h"
-#include "FormulaCell.h"
+#include "CellFactory.h"
 #include "Table.h"
 
 Table::~Table()
@@ -12,35 +12,31 @@ Table::~Table()
     close();
 }
 
-Cell *Table::parse(std::string &str)
+void Table::copy(Table &other)
 {
-    int intNum;
-    double doubleNum;
-    str = StringHelper::trim(str);
-
-    if(str.size() == 0) return nullptr;
-
-    std::stringstream ss(str);
-    if (ss >> intNum && ss.eof()) //Integer
-    {   
-        return new IntCell(intNum, str.length());
-    }
-    ss.seekg(0);
-    if (ss >> doubleNum && ss.eof()) //Double
-    {   
-        return new DoubleCell(doubleNum, str.length());
-    }
-    if(str[0] == '=') //Formula
+    for(int i=0; i < other.table.size(); i++)
     {
-        return new FormulaCell(str, table);
+        table.push_back(std::vector<Cell *>());
+        for(Cell *cell : other.table[i])
+        {
+            table[i].push_back(cell->clone(table));
+        }
     }
-    if(str[0] == '"' && str.back() == '"') //String
+}
+
+Table::Table(Table &other)
+{
+    copy(other);
+}
+
+Table &Table::operator =(Table &other)
+{
+    if(&other != this)
     {
-        std::string result = str.substr(1, str.length() - 2);
-        return new StringCell(result, result.length());
+        copy(other);
     }
 
-    return nullptr;
+    return *this;
 }
 
 void Table::read(const std::string &path)
@@ -93,7 +89,7 @@ void Table::read(const std::string &path)
                 getline(ss, empty, ',');
             }
 
-            Cell *ptr = parse(param);
+            Cell *ptr = CellFactory::make(param, table);
             
             if(ptr == nullptr && !param.empty()) 
                 std::cerr << "Error: row " << row << ", col " << maxCols << ", "<< param << " is unknown data type" << std::endl;
@@ -122,16 +118,16 @@ void Table::edit(size_t row, size_t col, std::string data)
         return;
     }
 
-    Cell *ptr = parse(data);
+    Cell *ptr = CellFactory::make(data, table);
     if(table[col].size() < row + 1) table[col].resize(row + 1, nullptr);
 
-    if(table[col][row] != nullptr)
-        delete table[col][row];
+    if(table[row][col] != nullptr)
+        delete table[row][col];
 
     
     if(ptr != nullptr)
     {
-        table[col][row] = ptr;
+        table[row][col] = ptr;
         ptr->print(std::cout);
         std::cout << " successfully edited\n";
         StringHelper::printComments();

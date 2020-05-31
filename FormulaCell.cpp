@@ -10,6 +10,11 @@ void FormulaCell::serialize(std::ostream &stream)
     stream << expression;
 }
 
+Cell *FormulaCell::clone(std::vector < std::vector <Cell *> > &_table)
+{
+    return new FormulaCell(expression, _table);
+}
+
 void FormulaCell::print(std::ostream &stream) 
 { 
     length = 3;
@@ -65,7 +70,12 @@ double FormulaCell::getNum(std::stringstream &ss)
             StringHelper::addComment("Element at row " + std::to_string(row) + " col " + std::to_string(col) + " is empty\n");
             number = 0;
         }
-        else 
+        else if(table[row][col] == this)
+        {
+            StringHelper::addComment("Element at row " + std::to_string(row) + " col " + std::to_string(col) + " contains recursive definition\n");
+            number = 0;
+        }
+        else
             number = table[row][col]->getValue();
     }
 
